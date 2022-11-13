@@ -95,7 +95,23 @@ booksRouter.post(
       "website",
       "authorId",
     ]);
-
+    //for array of connected values
+    /*if (filteredBody.genreIds) {
+      const genresToAssociate = fileteredBody.genres.map(genreId => {
+        return {
+          genre: {
+            create: {
+              id: genreId,
+            },
+          },
+        },
+      });
+      filteredBody.genres = {
+        create: genresToAssociate,
+      };
+      delete fileteredBody.genreIds;
+    }
+    */
     if (request.body.genreIds) {
       const genres = request.body.genreIds.map((genreId) => ({
         genre: {

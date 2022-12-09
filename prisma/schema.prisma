@@ -11,47 +11,63 @@ datasource db {
 }
 
 
-// An author can have many books
-model Author {
-  id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  firstName   String
-  lastName    String
-  books       Book[]    @relation("AuthorBook")
+model User {
+  userId  Int             @id @default(autoincrement())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  username            String  @unique
+  firstName           String
+  lastName            String
+  password            String
+  email               String  @unique
+  bio                 String?
+  birthday            String
+  tweet               Tweet[] @relation("username_Tweet")
+  replies             Reply[] @relation("user_reply") 
+  favorite            Favorite[] @relation("user_favorites")
+  following           Follow[] @relation("user_following")
+  followers           Follow[] @relation("user_followers")
 }
 
-// A book belongs to one author
-model Book {
-  id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  title       String
-  subtitle    String
-  published   DateTime
-  publisher   String
-  pages       Int
-  description String
-  website     String
-  authorId    Int
-  author      Author    @relation("AuthorBook", fields: [authorId], references: [id])
-  genres      BookGenre[] @relation("BookBookGenre")
+model Tweet {
+  id Int              @id @default(autoincrement())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  content             String
+  userid              Int
+  username            User @relation("username_Tweet", fields: [id], references: [userId], onDelete: Cascade)
+  reply               Reply[] @relation("reply_tweet")
+  favorite            Favorite[] @relation("favorite_tweet")
 }
 
-model Genre {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  title     String
-  books     BookGenre[]   @relation("GenreBookGenre")
+model Reply {
+  id Int              @id @default(autoincrement())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  tweetId             Int
+  tweet               Tweet @relation("reply_tweet", fields: [tweetId], references: [id], onDelete: Cascade)
+  userid              Int
+  username            User @relation("user_reply", fields: [id], references: [userId], onDelete: Cascade)
+  content             String
 }
 
-model BookGenre {
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  bookId    Int
-  book      Book      @relation("BookBookGenre", fields: [bookId], references: [id])
-  genreId   Int
-  genre     Genre     @relation("GenreBookGenre", fields: [genreId], references: [id])
-  @@id([bookId, genreId])
+model Favorite {
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  tweetId             Int
+  tweet               Tweet @relation("favorite_tweet", fields:[tweetId], references:[id],onDelete: Cascade) 
+  userid              Int
+  username            User @relation("user_favorites", fields: [userid], references: [userId], onDelete: Cascade)
+  @@id([userid, tweetId])
+}
+
+model Follow {
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  followId            Int
+  following           User @relation("user_following", fields: [followId], references: [userId], onDelete: Cascade)
+  followerId          Int
+  follower            User @relation("user_followers", fields: [followerId], references: [userId], onDelete: Cascade)
+
+  @@id([followId, followerId])
 }
